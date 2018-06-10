@@ -7,6 +7,13 @@ test*
 
 web/js/gen_layers.js
 
+# FloydHub
+.floydexpt
+.floydignore
+
+# IDE
+.idea/
+
 # checkpoint
 checkpoint
 
