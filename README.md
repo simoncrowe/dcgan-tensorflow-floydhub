@@ -1,6 +1,103 @@
-# DCGAN in Tensorflow
+# FloydHub Clone of carpedm20/DCGAN-tensorflow
+This is a slightly modified version of carpedm20's code. It is meant for use with the <a href="https://floydhub.com" target="_blank">FloydHub</a> deep leaning platform. If you wish to run a DCGAN on your own hardware or cloud infrasturcture other than FloydHub, I would suggest looking at the <a href="https://github.com/carpedm20/DCGAN-tensorflow" target="_blank">original repository</a>.
 
-Tensorflow implementation of [Deep Convolutional Generative Adversarial Networks](http://arxiv.org/abs/1511.06434) which is a stabilize Generative Adversarial Networks. The referenced torch code can be found [here](https://github.com/soumith/dcgan.torch).
+## Useage
+
+#### Getting your own training data
+
+Although this repository contains code for downloading several standard datasets, I haven't tested this with FloydHub. I would recommend either using one of the datasets already avalaible on Floydhub or uploading your own.
+
+If using your own dataset, ensure that 
+* all images are the same dimensions and colour mode e.g. all 512x512px and either all greyscale or all RGB. A mixture of colour modes could lead the model to fail half-way through training.
+* all images are placed in sub-directories in your dataset all starting with 'train' e.g. train or train01 train01 train03 etc.
+
+#### First run
+Once your Floydhub dataset and project are initilised, run a command like the following from the directory where you've initilised your project.
+
+##### Explanation of command when using a FloydHub dataset (pre-existing or your own) 
+
+    $ floyd run \
+        --gpu (It is recommended to use GPU for deep learning over images.
+               Ommiting this switch will result in slower training using CPU.) \
+        --env tensorflow-1.8 (The original requirments are Tensorflow  0.12.1.
+                              However, it works with newer versions.) \
+        --data <PATH TO FLOYDHUB DATASET>:<DIRECTORY NAME FOR MOUNTING DATA> \
+         "python main.py \
+        --dataset=<DIRECTORY NAME FOR MOUNTING DATA> \
+        --data_dir=/ (this needs to remain the root diretory as this is where 
+                      FloydHub mounts datasets') \
+        --batch_size= <THE NUMBER OF TRAINGING EXAMPLES TO PROCESS AT ONCE. 
+                       THIS MUST BE A SQUARE NUMBER. e.g. 16, 25, 36, 49
+                       GENERALLY THIS WILL SMALLER IF YOUT IMAGES ARE LARGER.
+                       DEFAULT: 64> \
+        --save_frequency=<HOW FREQUENTLY TO SAVE SAMPLE IMAGES DURING TRAINING.
+                          DEFAULT: 100> \
+        --generate_test_images=<HOW MANY TEST IMAGES TO GENERATE AT THE END OF 
+                                TRAINING. DEFAULT: 50> \
+        --input_height=<THE HEIGHT OF THE IMAGES IN YOUR TRAINING DATASET. 
+                        DEFAULT 256> \
+        --input_width=<THE WIDTH OF THE IMAGES IN YOUR TRAINING DATASET
+                       DEFAULT: input_width> \
+        --output_height=<THE HEIGHT OF THE IMAGES YOU WANT THE GAN TO OUTPUT
+                         DEFAULT: 256> \
+        --output_width=<THE WIDTH OF THE IMAGES YOU WANT THE GAN TO OUTPUT
+                        DEFAULT: output_height> \
+        --epoch=<NUMBER OF TIMES THE PROGRAM WILL CYCLE THOUGH YOUR TRAINING DATA 
+                 BEFORE COMPLETING TRAINING. DEFAULT: 25> \
+        --sample_dir=/output (this needs to remain '/output' as this is the only 
+                      location FLoydhHub persists files once a command/job has 
+                      been succesfully executed.) \
+        --train"
+        
+##### Example of command when using a FloydHub dataset (pre-existing or your own) 
+
+    $ floyd run \
+        --gpu \
+        --env tensorflow-1.8 \
+        --data milkgan/datasets/selfie-100k-512/1:selfie-100k-512 \
+        "python main.py \
+        --dataset=selfie-100k-512 \
+        --data_dir=/ \
+        --batch_size=25 \
+        --save_frequency=50 \
+        --generate_test_images=25 \
+        --input_height=512 \
+        --input_width=512 \
+        --output_height=512 \
+        --output_width=512 \
+        --epoch=5 \
+        --sample_dir=/output \
+        --train" 
+
+#### Further runs
+The code has been modified to save the model's checkpoint directory in FloydHub's output. This means that you can train your model incrementally. 
+
+In order to do this, you will need to copy the **checkpoint** directory from the output of the previous run of your project and upload this to Floydhub as a separate dataset. In the example below the path of the checkpoint dataset is milkgan/datasets/self-dcgan-checkpoint-5-epochs/1.
+
+##### Example of command when using FloydHub dataset and checkpoints from a previous job
+    floyd run \
+        --gpu \
+        --env tensorflow-1.8 \
+        --data milkgan/datasets/selfie-100k-512/1:selfie-100k-512 \
+        --data milkgan/datasets/self-dcgan-checkpoint-5-epochs/1:checkpoint \
+        "python main.py \
+        --dataset=selfie-100k-512 \
+        --data_dir=/ \
+        --checkpoint_dir=/checkpoint \
+        --batch_size=25 \
+        --save_frequency=100 \
+        --generate_test_images=25 \
+        --input_height=512 \
+        --input_width=512 \
+        --output_height=512 \
+        --output_width=512 \
+        --epoch=5 \
+        --sample_dir=/output \
+        --train"
+
+# Original Readme
+
+Tensorflow implementation of [Deep Convolutional Generative Adversarial Networks](http://arxiv.org/abs/1511.06434) which are  stabilized Generative Adversarial Networks. The referenced torch code can be found [here](https://github.com/soumith/dcgan.torch).
 
 ![alt tag](DCGAN.png)
 
@@ -25,7 +122,7 @@ Tensorflow implementation of [Deep Convolutional Generative Adversarial Networks
 - (Optional) [Align&Cropped Images.zip](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) : Large-scale CelebFaces Dataset
 
 
-## Usage
+## Usage (not guareneed to work)
 
 First, download dataset with:
 
