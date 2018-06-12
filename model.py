@@ -1,14 +1,14 @@
 from __future__ import division
 import os
 import time
-import math
 from glob import glob
 import tensorflow as tf
 import numpy as np
-from six.moves import xrange
 
 from ops import *
 from utils import *
+
+from global_config import INTERNAL_CHECKPOINT_DIR, SAMPLE_DIR, DATA_DIR
 
 
 def conv_out_size_same(size, stride):
@@ -36,7 +36,7 @@ class DCGAN(object):
                  input_fname_pattern='*.jpg',
                  checkpoint_dir=None,
                  sample_dir=None,
-                 data_dir='./data'):
+                 data_dir=DATA_DIR):
         """
 
         Args:
@@ -87,7 +87,9 @@ class DCGAN(object):
 
         self.dataset_name = dataset_name
         self.input_fname_pattern = input_fname_pattern
-        self.checkpoint_dir = checkpoint_dir
+
+        # Ensure that the internal, rather than an external mounted checkpoint directory is used
+        self.checkpoint_dir = INTERNAL_CHECKPOINT_DIR
         self.data_dir = data_dir
 
         if self.dataset_name == 'mnist':
@@ -221,7 +223,7 @@ class DCGAN(object):
             else:
                 self.data = glob(
                     os.path.join(
-                        config.data_dir,
+                        DATA_DIR,
                         config.dataset,
                         'train*/',
                         self.input_fname_pattern
@@ -322,7 +324,7 @@ class DCGAN(object):
                             }
                         )
                         save_images(samples, image_manifold_size(samples.shape[0]),
-                                    './{}/train_{:02d}_{:04d}.png'.format(config.sample_dir, epoch, idx))
+                                    './{}/train_{:02d}_{:04d}.png'.format(SAMPLE_DIR, epoch, idx))
                         print("[Sample] d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss))
                     else:
                         samples, d_loss, g_loss = self.sess.run(
@@ -336,7 +338,7 @@ class DCGAN(object):
                             samples,
                             image_manifold_size(samples.shape[0]),
                             '{sample_dir}/train_{epoch:02d}_{index:04d}.png'.format(
-                                sample_dir=config.sample_dir,
+                                sample_dir=SAMPLE_DIR,
                                 epoch=epoch,
                                 index=idx
                             )
@@ -344,7 +346,7 @@ class DCGAN(object):
                         print("[Sample] d_loss: %.8f, g_loss: %.8f" % (d_loss, g_loss))
 
                 if np.mod(counter, 500) == 2:
-                    self.save(config.checkpoint_dir, counter)
+                    self.save(INTERNAL_CHECKPOINT_DIR, counter)
 
     def discriminator(self, image, y=None, reuse=False):
         with tf.variable_scope("discriminator") as scope:

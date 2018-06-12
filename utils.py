@@ -13,6 +13,8 @@ from six.moves import xrange
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
+from global_config import SAMPLE_DIR
+
 pp = pprint.PrettyPrinter()
 
 get_stddev = lambda x, k_h, k_w: 1 / math.sqrt(k_w * k_h * x.get_shape()[-1])
@@ -191,7 +193,7 @@ def visualize(sess, dcgan, config, option):
             samples,
             [image_frame_dim, image_frame_dim],
             '{sample_dir}/test_{timestamp}.png'.format(
-                sample_dir=config.sample_dir,
+                sample_dir=SAMPLE_DIR,
                 timestamp=strftime("%Y-%m-%d-%H-%M-%S", gmtime())
             )
         )
@@ -216,7 +218,7 @@ def visualize(sess, dcgan, config, option):
             save_images(
                 samples,
                 [image_frame_dim, image_frame_dim],
-                '{sample_dir}/test_arange_{index}.png'.format(sample_dir=config.sample_dir, index=idx)
+                '{sample_dir}/test_arange_{index}.png'.format(sample_dir=SAMPLE_DIR, index=idx)
             )
 
 
@@ -243,7 +245,7 @@ def visualize(sess, dcgan, config, option):
                 make_gif(
                     samples,
                     '{sample_dir}/test_gif_{index}.gif'.format(
-                        sample_dir=config.sample_dir,
+                        sample_dir=SAMPLE_DIR,
                         index=idx
                     )
                 )
@@ -252,7 +254,7 @@ def visualize(sess, dcgan, config, option):
                     samples,
                     [image_frame_dim, image_frame_dim],
                     '/test_{timestamp}.png'.format(
-                        sample_dir=config.sample_dir,
+                        sample_dir=SAMPLE_DIR,
                         timestamp=strftime("%Y-%m-%d-%H-%M-%S", gmtime())
                     )
                 )
@@ -268,7 +270,7 @@ def visualize(sess, dcgan, config, option):
             make_gif(
                 samples,
                 '{sample_dir}/test_gif_{index}.gif'.format (
-                    sample_dir=config.sample_dir,
+                    sample_dir=SAMPLE_DIR,
                     index=idx
                 )
             )

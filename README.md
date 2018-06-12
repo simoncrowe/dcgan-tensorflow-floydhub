@@ -1,34 +1,35 @@
 # FloydHub Clone of carpedm20/DCGAN-tensorflow
-This is a slightly modified version of carpedm20's code. It is meant for use with the <a href="https://floydhub.com" target="_blank">FloydHub</a> deep leaning platform. If you wish to run a DCGAN on your own hardware or cloud infrasturcture other than FloydHub, I would suggest looking at the <a href="https://github.com/carpedm20/DCGAN-tensorflow" target="_blank">original repository</a>.
+This is a slightly modified version of <a href="https://github.com/carpedm20" target="_blank">carpedm20</a>'s code. It is meant for use with the <a href="https://floydhub.com" target="_blank">FloydHub</a> deep learning platform. If you wish to run a DCGAN on your own hardware or cloud infrasturcture other than that of FloydHub, I would suggest looking at the <a href="https://github.com/carpedm20/DCGAN-tensorflow" target="_blank">original repository</a>.
 
 ## Useage
 
-#### Getting your own training data
+#### Getting training data
 
-Although this repository contains code for downloading several standard datasets, I haven't tested this with FloydHub. I would recommend either using one of the datasets already avalaible on Floydhub or uploading your own.
+You can either use one of the datasets already on the FloydHub platform or upload your own.
 
 If using your own dataset, ensure that 
 * all images are the same dimensions and colour mode e.g. all 512x512px and either all greyscale or all RGB. A mixture of colour modes could lead the model to fail half-way through training.
-* all images are placed in sub-directories in your dataset all starting with 'train' e.g. train or train01 train01 train03 etc.
+* all images are placed in sub-directories within the root directory of your dataset. This program will only load images in subdirectoies beginning with the word '**train**' e.g. **train**ing_data (all images in one directory) or **train**01 **train**01 **train**03 etc. (images in several _batches_) 
 
 #### First run
-Once your Floydhub dataset and project are initilised, run a command like the following from the directory where you've initilised your project.
+Once your Floydhub dataset and project are initilised, use the **floyd run** command from the directory where you've initialised your project.
 
-##### Explanation of command when using a FloydHub dataset (pre-existing or your own) 
+##### Explanation of command flags
 
     $ floyd run \
         --gpu (It is recommended to use GPU for deep learning over images.
-               Ommiting this switch will result in slower training using CPU.) \
-        --env tensorflow-1.8 (The original requirments are Tensorflow  0.12.1.
-                              However, it works with newer versions.) \
+               Omiting this switch will result in slower training using CPU.) \
+        --env tensorflow-1.8 (The original requirment was Tensorflow  0.12.1.
+                              However, the code works with newer versions.) \
         --data <PATH TO FLOYDHUB DATASET>:<DIRECTORY NAME FOR MOUNTING DATA> \
          "python main.py \
         --dataset=<DIRECTORY NAME FOR MOUNTING DATA> \
-        --data_dir=/ (this needs to remain the root diretory as this is where 
-                      FloydHub mounts datasets') \
+        --checkpoint_dir=<THE DIRECTORY WHERE YOU WANT CHECPOINTS TO BE COPIED
+                          FROM. THIS ALLOWS YOU TO RESUME TRAINING WHERE A PREVIOUS 
+                          RUN OF THE PROGRAM LEFT OFF. DEFAULT: /checkpoint> \
         --batch_size= <THE NUMBER OF TRAINGING EXAMPLES TO PROCESS AT ONCE. 
                        THIS MUST BE A SQUARE NUMBER. e.g. 16, 25, 36, 49
-                       GENERALLY THIS WILL SMALLER IF YOUT IMAGES ARE LARGER.
+                       GENERALLY THIS WILL BE SMALLER IF YOUR IMAGES ARE LARGER.
                        DEFAULT: 64> \
         --save_frequency=<HOW FREQUENTLY TO SAVE SAMPLE IMAGES DURING TRAINING.
                           DEFAULT: 100> \
@@ -42,14 +43,11 @@ Once your Floydhub dataset and project are initilised, run a command like the fo
                          DEFAULT: 256> \
         --output_width=<THE WIDTH OF THE IMAGES YOU WANT THE GAN TO OUTPUT
                         DEFAULT: output_height> \
-        --epoch=<NUMBER OF TIMES THE PROGRAM WILL CYCLE THOUGH YOUR TRAINING DATA 
+        --epoch=<NUMBER OF TIMES THE PROGRAM WILL CYCLE THROUGH YOUR TRAINING DATA 
                  BEFORE COMPLETING TRAINING. DEFAULT: 25> \
-        --sample_dir=/output (this needs to remain '/output' as this is the only 
-                      location FLoydhHub persists files once a command/job has 
-                      been succesfully executed.) \
         --train"
         
-##### Example of command when using a FloydHub dataset (pre-existing or your own) 
+##### Example of command using a FloydHub dataset
 
     $ floyd run \
         --gpu \
@@ -57,7 +55,6 @@ Once your Floydhub dataset and project are initilised, run a command like the fo
         --data milkgan/datasets/selfie-100k-512/1:selfie-100k-512 \
         "python main.py \
         --dataset=selfie-100k-512 \
-        --data_dir=/ \
         --batch_size=25 \
         --save_frequency=50 \
         --generate_test_images=25 \
@@ -66,7 +63,6 @@ Once your Floydhub dataset and project are initilised, run a command like the fo
         --output_height=512 \
         --output_width=512 \
         --epoch=5 \
-        --sample_dir=/output \
         --train" 
 
 #### Further runs
@@ -74,7 +70,7 @@ The code has been modified to save the model's checkpoint directory in FloydHub'
 
 In order to do this, you will need to copy the **checkpoint** directory from the output of the previous run of your project and upload this to Floydhub as a separate dataset. In the example below the path of the checkpoint dataset is milkgan/datasets/self-dcgan-checkpoint-5-epochs/1.
 
-##### Example of command when using FloydHub dataset and checkpoints from a previous job
+##### Example of command using FloydHub dataset and checkpoints from a previous job
     floyd run \
         --gpu \
         --env tensorflow-1.8 \
@@ -82,7 +78,6 @@ In order to do this, you will need to copy the **checkpoint** directory from the
         --data milkgan/datasets/self-dcgan-checkpoint-5-epochs/1:checkpoint \
         "python main.py \
         --dataset=selfie-100k-512 \
-        --data_dir=/ \
         --checkpoint_dir=/checkpoint \
         --batch_size=25 \
         --save_frequency=100 \
@@ -92,7 +87,6 @@ In order to do this, you will need to copy the **checkpoint** directory from the
         --output_height=512 \
         --output_width=512 \
         --epoch=5 \
-        --sample_dir=/output \
         --train"
 
 # Original Readme
@@ -120,39 +114,6 @@ Tensorflow implementation of [Deep Convolutional Generative Adversarial Networks
 - [pillow](https://github.com/python-pillow/Pillow)
 - (Optional) [moviepy](https://github.com/Zulko/moviepy) (for visualization)
 - (Optional) [Align&Cropped Images.zip](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) : Large-scale CelebFaces Dataset
-
-
-## Usage (not guareneed to work)
-
-First, download dataset with:
-
-    $ python download.py mnist celebA
-
-To train a model with downloaded dataset:
-
-    $ python main.py --dataset mnist --input_height=28 --output_height=28 --train
-    $ python main.py --dataset celebA --input_height=108 --train --crop
-
-To test with an existing model:
-
-    $ python main.py --dataset mnist --input_height=28 --output_height=28
-    $ python main.py --dataset celebA --input_height=108 --crop
-
-Or, you can use your own dataset (without central crop) by:
-
-    $ mkdir data/DATASET_NAME
-    ... add images to data/DATASET_NAME ...
-    $ python main.py --dataset DATASET_NAME --train
-    $ python main.py --dataset DATASET_NAME
-    $ # example
-    $ python main.py --dataset=eyes --input_fname_pattern="*_cropped.png" --train
-
-If your dataset is located in a different root directory:
-
-    $ python main.py --dataset DATASET_NAME --data_dir DATASET_ROOT_DIR --train
-    $ python main.py --dataset DATASET_NAME --data_dir DATASET_ROOT_DIR
-    $ # example
-    $ python main.py --dataset=eyes --data_dir ../datasets/ --input_fname_pattern="*_cropped.png" --train
     
 
 ## Results
